@@ -4,10 +4,10 @@ There's both a light and dark mode:
 ![screenshot of vim in dark mode inside wezterm over vim in light mode inside foot](screenshots/cute-vim.png)
 
 You can move the current line by holding the Alt key, and quickly change the appearance with the F8/F9/F10 keys:
-![recording of vim in light mode using alt arrows to move the current line, then f8 f9 f10 to change the appearance](screenshots/alt-keys-f8-f9-10.mp4)
+![recording of vim in light mode using alt arrows to move the current line, then f8 f9 f10 to change the appearance](recordings/alt-keys-f8-f9-10.gif)
 
 You can also move blocks of text by selecting a range (first hold the Shift key then use the arrows) which can then be moved around by holding both Control and Shift and using the arrow keys:
-![recording of vim in light mode using ctrl shift arrows to move a block of text](screenshots/shift-arrows_then_ctrl-shift.mp4)
+![recording of vim in light mode using ctrl shift arrows to move a block of text](recordings/shift-arrows_then_ctrl-shift.gif)
 
 # What is CuteVim?
 
