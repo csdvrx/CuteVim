@@ -7,7 +7,7 @@ You can move the current line by holding the Alt key, and quickly change the app
 ![recording of vim in light mode using alt arrows to move the current line, then f8 f9 f10 to change the appearance](screenshots/alt-keys-f8-f9-10.mp4)
 
 You can also move blocks of text by selecting a range (first hold the Shift key then use the arrows) which can then be moved around by holding both Control and Shift and using the arrow keys:
-[!recording of vim in light mode using ctrl shift arrows to move a block of text](screenshots/shift-arrows_then_ctrl-shift.mp4)
+![recording of vim in light mode using ctrl shift arrows to move a block of text](screenshots/shift-arrows_then_ctrl-shift.mp4)
 
 # What is CuteVim?
 
