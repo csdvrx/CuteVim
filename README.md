@@ -9,6 +9,20 @@ You can move the current line by holding the Alt key, and quickly change the app
 You can also move blocks of text by selecting a range (first hold the Shift key then use the arrows) which can then be moved around by holding both Control and Shift and using the arrow keys:
 ![recording of vim in light mode using ctrl shift arrows to move a block of text](recordings/shift-arrows_then_ctrl-shift.gif)
 
+# TLDR; love the pics, love the concept, I want to test it, how can I quickly do that?
+
+Just ![download the Christmas release](https://raw.githubusercontent.com/csdvrx/CuteVim/main/release/cutevim-20231225.com) rename it vim.com and run it:
+
+ - `wget https://raw.githubusercontent.com/csdvrx/CuteVim/main/release/cutevim-20231225.com`
+
+ - `cp cutevim-20231225.com vim.com`
+
+ - `chmod +x ./vim.com`
+
+ - `./vim.com -u /zip/usr/share/vim/vimrc`
+
+The last line is important: without it, if you already have a .vimrc, it would be read.
+
 # What is CuteVim?
 
 CuteVim is a minimal configuration file (TODO: it's not all included in .vimrc yet) to give sensible defaults to Vim, like:
@@ -77,4 +91,64 @@ I wanted to have a cute editor for [☪ ☮$m✡✝🍏linux](http://github.com/
 
 So CuteVim configuration mostly fit within .vimrc, the one file I will not forget to take!
 
-CuteVim still depends on ~/.vim/after/syntax for italics within .vim files, and ~/.vim/colors for the [default Solarized theme](https://en.wikipedia.org/wiki/Solarized), but I'll try to eventually fit everything inside the .vimrc (or at least switch to a default vim there if missing ~/.vim/colors/solarized*.vim)
+It's also much easier to make a release: it only takes `./zip -r vim.com usr/share/vim/vimrc` to refresh it.
+
+# How can I make my own CuteVim APE?
+
+Use `refresh.sh` which does the following:
+
+## Get clean binaries
+
+    rm -f vim.com zip.com unzip.com
+    wget https://cosmo.zip/pub/cosmos/bin/vim -O vim.com
+    wget https://cosmo.zip/pub/cosmos/bin/zip -O zip.com
+    wget https://cosmo.zip/pub/cosmos/bin/unzip -O unzip.com
+
+## Add vimrc in the right place
+
+    ./zip -r vim.com usr/share/vim/vimrc
+
+## How do we know it's the right place?
+
+First, check what's the default path for this version
+
+    ./vim.com --version | grep usr/share
+
+You'll see `fall-back for $VIM: "/zip/usr/share/vim"`
+
+Now, check with `--strace` what's happening:
+
+    vim.com --strace 2> vim.strace.txt
+    # (then type :q!)
+
+Use grep on the strace file to skip to the important parts:
+
+    grep zip.usr.share.vim vim.strace.txt |grep defaults.vim | less
+
+    grep zip.usr.share.vim vim.vanilla.strace.txt |grep vimrc
+
+You'll see:
+
+grep zip.usr.share.vim vim.vanilla.strace.txt |grep vimrc
+
+    SYS 1646170 1646170         12'999'983 fstatat(AT_FDCWD, "/zip/usr/share/vim/vim90/defaults.vim", [{.st_size=4'952, .st_blocks=2'560/512, .st_mode=0100644, .st_dev=0x172120, .st_ino=0x1097916, .st_blksize=65'536}], 0) → 0 ENOTSUP
+    SYS 1646170 1646170         13'032'512 openat(AT_FDCWD, "/zip/usr/share/vim/vim90/defaults.vim", O_RDONLY) → 3 ENOTSUP
+
+And earlier than this:
+
+    SYS 1646170 1646170         12'917'060 fstatat(AT_FDCWD, "/zip/usr/share/vim/vimrc", [n/a], 0) → -1 ENOENT
+    SYS 1646170 1646170         12'920'202 openat(AT_FDCWD, "/zip/usr/share/vim/vimrc", O_RDONLY) → -1 ENOENT
+
+This is why we do `./zip -r vim.com usr/share/vim/vimrc`, to embed a vimrc from `./usr/share/vim/vimrc` inside the zip part of the APE, which maps to the path `/zip/usr/share/vim/vimrc`
+
+Running vim.com again with strace, the file is seen:
+
+     SYS 1650340 1650340        114'662'106 fstatat(AT_FDCWD, "/zip/usr/share/vim/vimrc", [{.st_size=42'484, .st_blocks=14'848/512, .st_mode=0100644, .st_dev=0x7c98aa, .st_ino=0x10b712f, .st_blksize=65'536}], 0) → 0 ENOTSUP
+
+42484 is the size, ENOTSUP is just because of O_RDONLY
+
+# Italics are missing, and the APE is not using Solarized
+
+CuteVim still depends on ~/.vim/after/syntax for italics within .vim files, and ~/.vim/colors for the [default Solarized theme](https://en.wikipedia.org/wiki/Solarized)
+
+I'll try to eventually fit everything inside the .vimrc (or at least switch to a default vim there if missing ~/.vim/colors/solarized\*.vim), which will unify the APE and the non-APE experience
