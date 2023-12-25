@@ -14,11 +14,15 @@ chmod +x vim.com
 ./vim.com --version | grep usr/share
 # fall-back for $VIM: "/zip/usr/share/vim"
 
-# Thefore:
+# Therefore add the vimrc in usr/share/vim
+mkdir -o ./usr/share/vim
+cp .vimrc ./usr/share/vim/vimrc
 ./zip -r vim.com usr/share/vim/vimrc
 
-### Explained:
-## Use strace to check:
+# Check
+./unzip -l vim.com |grep usr/share/vim/vimrc
+
+# To explain the above, use strace to check:
 #vim.com --strace 2> vim.strace.txt
 #grep zip.usr.share.vim vim.strace.txt |grep defaults.vim | less
 #SYS 1646170 1646170         12'999'983 fstatat(AT_FDCWD, "/zip/usr/share/vim/vim90/defaults.vim", [{.st_size=4'952, .st_blocks=2'560/512, .st_mode=0100644, .st_dev=0x172120, .st_ino=0x1097916, .st_blksize=65'536}], 0) → 0 ENOTSUP
@@ -31,4 +35,4 @@ chmod +x vim.com
 # ./zip -r vim.com usr/share/vim/vimrc
 # Running it again, it's seen:
 #SYS 1650340 1650340        114'662'106 fstatat(AT_FDCWD, "/zip/usr/share/vim/vimrc", [{.st_size=42'484, .st_blocks=14'848/512, .st_mode=0100644, .st_dev=0x7c98aa, .st_ino=0x10b712f, .st_blksize=65'536}], 0) → 0 ENOTSUP
-
+# 42484 is the filesize, ENOTSUP is because of O_RDONLY
