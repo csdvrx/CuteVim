@@ -171,7 +171,13 @@ Instead of fitting everything inside a single .vimrc, the `refresh.sh` now inclu
 
 This unifies the APE and the non-APE experience
 
-# I use Windows Terminal and I would like to add direct access to CuteVim as a profile
+# On Windows, do I need WSL to use CuteVim?
+
+No you don't. CuteVim will work with or without WSL: just double-click on cutevim binary to start it.
+
+Note that drag-and-drop to files into the window is not supported yet (TODO: open a new tab withim Vim), so if you use Vim a lot, it may be easier to have CuteVim as a keyboard shortcut.
+
+# How can I add a direct access to CuteVim as a Windows Terminal profile?
 
 Copy cutevim-20231229.com to C:\ using the File Explorer: you will need administrative permissions. If you don't have them, use another folder like `%UserProfile%` which usually goes to your folder in C:\Users\ (personally, I prefer to have basic utilities in the root of the C: drive)
 
@@ -195,3 +201,21 @@ Click on "Save": you can now call CuteVim directly from the dropdown with a shor
 ![Example of the new profile](screenshots/Windows-Terminal-Result.png)
 
 If you prefer the light theme, type `set background=light` or edit `./usr/share/vim/vimrc` then refresh the assets with `./refresh.sh`
+
+Note that some shortcuts are not supported yet:
+
+ - the appearance shortcuts F8/F9/F10 (F8 generates ^[[19~, F9 generates ^[[20~, F10 generates ^[[21~)
+
+ - the Alt, Shift and Control selections (Windows Terminal remaps Ctrl-Shift-Up to the buffer scroll)
+
+Contributions are welcome, ideally as patches to the vimrc: this is to avoid changing Windows Terminal defaults unless it's absolutely required (such as to override defaults like the Ctrl-Shift-Up)
+
+# TODO
+
+Coming next, in no specific order:
+
+ - make the function looking for .git/HEAD recursive
+
+ - improve Windows Terminal support
+
+ - suggest some sensible Windows Terminal config options as a .json patch
