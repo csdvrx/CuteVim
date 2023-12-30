@@ -13,9 +13,9 @@ You can also move blocks of text by selecting a range (first hold the Shift key 
 
 Just ![download the Christmas release](https://raw.githubusercontent.com/csdvrx/CuteVim/main/release/cutevim-20231225.com) rename it vim.com and run it:
 
- - `wget https://raw.githubusercontent.com/csdvrx/CuteVim/main/release/cutevim-20231225.com`
+ - `wget https://raw.githubusercontent.com/csdvrx/CuteVim/main/release/cutevim-20231229.com`
 
- - `cp cutevim-20231225.com vim.com`
+ - `cp cutevim-20231229.com vim.com`
 
  - `chmod +x ./vim.com`
 
@@ -149,6 +149,49 @@ Running vim.com again with strace, the file is seen:
 
 # Italics are missing, and the APE is not using Solarized
 
-CuteVim still depends on ~/.vim/after/syntax for italics within .vim files, and ~/.vim/colors for the [default Solarized theme](https://en.wikipedia.org/wiki/Solarized)
+This means you are using the old version (Xmas release, 2023-12-25) which didn't include ./usr/share/vim/vimfiles/after and ./usr/share/vim/vimfiles/colors, and only included the .vimrc
 
-I'll try to eventually fit everything inside the .vimrc (or at least switch to a default vim there if missing ~/.vim/colors/solarized\*.vim), which will unify the APE and the non-APE experience
+CuteVim depends on after/syntax/ for italics within .vim files, and colors/ for the [default Solarized theme](https://en.wikipedia.org/wiki/Solarized)
+
+Instead of fitting everything inside a single .vimrc, the `refresh.sh` now includes a few extra assets from usr/share/vim/vimfiles:
+
+ - usr/share/vim/vimfiles/colors/solarized8_low.vim
+
+ - usr/share/vim/vimfiles/colors/solarized8_high.vim
+
+ - usr/share/vim/vimfiles/colors/solarized8.vim
+
+ - usr/share/vim/vimfiles/colors/solarized.vim
+
+ - usr/share/vim/vimfiles/colors/solarized8_flat.vim
+
+ - usr/share/vim/vimfiles/after/syntax/python.vim
+
+ - usr/share/vim/vimfiles/after/syntax/vim.vim
+
+This unifies the APE and the non-APE experience
+
+# I use Windows Terminal and I would like to add direct access to CuteVim as a profile
+
+Copy cutevim-20231229.com to C:\ using the File Explorer: you will need administrative permissions. If you don't have them, use another folder like `%UserProfile%` which usually goes to your folder in C:\Users\ (personally, I prefer to have basic utilities in the root of the C: drive)
+
+Open Windows Terminal settings in the drowndown, or use the default shortcut (press Ctrl+,)
+
+Inside the settings, select Profiles on the left, go to "+ Add a new profile"
+
+Click on "Duplicate" to duplicate the Windows Powershell profile
+
+Click on "Name" to rename it to "Cute Vim"
+
+Click on "Command line" to replace it by "%SystemDrive%\cutevim-20231229.com"
+
+![Filling in CuteVim details](screenshots/Windows-Terminal-Duplicate.png)
+
+The end results should look like the following
+![CuteVim profile ](screenshots/Windows-Terminal-New-Profile.png)
+
+Click on "Save": you can now call CuteVim directly from the dropdown with a shortcut: Ctrl+Shift+6
+
+![Example of the new profile](screenshots/Windows-Terminal-Result.png)
+
+If you prefer the light theme, type `set background=light` or edit `./usr/share/vim/vimrc` then refresh the assets with `./refresh.sh`

@@ -36,3 +36,17 @@ cp .vimrc ./usr/share/vim/vimrc
 # Running it again, it's seen:
 #SYS 1650340 1650340        114'662'106 fstatat(AT_FDCWD, "/zip/usr/share/vim/vimrc", [{.st_size=42'484, .st_blocks=14'848/512, .st_mode=0100644, .st_dev=0x7c98aa, .st_ino=0x10b712f, .st_blksize=65'536}], 0) → 0 ENOTSUP
 # 42484 is the filesize, ENOTSUP is because of O_RDONLY
+
+## Prepare other assets:
+# italics for comments (python, vimrc)
+cp .vim/after/syntax/python.vim usr/share/vim/vimfiles/after/syntax
+cp .vim/after/syntax/vim.vim usr/share/vim/vimfiles/after/syntax
+# solarized theme
+cp .vim/colors/solarized.vim usr/share/vim/vimfiles/colors/
+cp .vim/colors/solarized8.vim usr/share/vim/vimfiles/colors/
+cp .vim/colors/solarized8_flat.vim usr/share/vim/vimfiles/colors/
+cp .vim/colors/solarized8_high.vim usr/share/vim/vimfiles/colors/
+cp .vim/colors/solarized8_low.vim usr/share/vim/vimfiles/colors/
+
+# then add them too
+./zip -r vim.com usr/share/vim/vimfiles
