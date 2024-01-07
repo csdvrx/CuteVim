@@ -45,7 +45,7 @@ CuteVim is a minimal configuration file (TODO: it's not all included in .vimrc y
 
  - playing ball with Wayland by having one shared copy-paste buffer
 
- - overriding dark themes to replace the uggly muddy darkgreys by a pure #000000 black: this is ideal on OLED screens which can do pitchblack and give you a higher constrast
+ - overriding dark themes to replace the uggly muddy darkgreys by a pure #000000 black: this is ideal on OLED screens which can do pitchblack and give you a higher contrast
 
 # Are these defaults really sensible?
 
