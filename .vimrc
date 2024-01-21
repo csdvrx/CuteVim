@@ -1,4 +1,4 @@
-" .vimrc version 20231229 - Romjul 2023 version!
+" .vimrc version 20240120 - Januarmaanad
 
 " #### WHEN STARTING/STOPPING
 
@@ -20,11 +20,38 @@ set suffixes=.aux,.bak,.dvi,.idx,.ps,.swp,.swo,.tar
 " Automatically save modifications to files on :next
 set autowrite
 
+" Disable the vim intro message to show something else
+set shortmess=I
+
+" ## WHEN STARTING WITHOUT A FILE, SHOW A CHOICE
+
+" Define a function that shows the list and opens the selected file
+function! LastFiles()
+  " Make a list using the backups, turn to paths, then make unique with awk
+  " (uniq would require sorting first)
+  let l:recent_backup_files = split(system('find ' . $HOME . '/.vim/backup/ -printf "%T+@ %p\\n"|sort -nr | cut -f 2 -d" "| sed -e "s/.*backup\/%/%/" -e "s|%|/|g" -e "s/~.*//g"' . "| awk '!seen [$0]++'"), '\n')
+  " Get the most recent 20 files
+  let l:top20 = l:recent_backup_files[:20]
+  " Add numbers to the list items
+  let l:choices = map(copy(l:top20), '"[" . (v:key + 1) . "] " . v:val')
+  " Display the list and prompt the user
+  let l:choice = inputlist(l:choices)
+  " Check if the choice is valid
+  if l:choice > 0 && l:choice <= len(l:top20)
+    " Edit the chosen file
+    execute "edit" l:top20[l:choice - 1]
+  endif
+endfunction
+
+if has("autocmd")
+ autocmd VimEnter * if !argc() | call LastFiles()
+endif
+
 " ## KEEP BACKUPS AND UNDO ON A PER FILE BASIS
-" # ACCOMODATE WINDOWS BAREMETAL WHERE THERE'S NO $HOME
+" # ACCOMODATE WINDOWS BAREMETAL: NO $HOME DEFINED
 if (!exists('$HOME') && exists('$HOMEDRIVE') && exists('$HOMEPATH'))
  let $HOME=$HOMEDRIVE.$HOMEPATH
-endif " $HOME
+endif
 
 " In ~/.vim/ : backup swap undo .netrwhist
 if !isdirectory($HOME."/.vim")
@@ -59,17 +86,22 @@ autocmd BufReadPost *
  \ if line("'\"") > 0 && line("'\"") <= line("$") |
  \   exe "normal g`\"" |
  \ endif " if line
+endif
 
 " ## KEEP PREVIOUS VERSIONS OF FILES
-" # FIXME: should check an exclusion list to avoid saving sensitive files
 " WARNING: autocmd can confuse to busybox vi, always make it conditional
 if has("autocmd")
 " Can limit max files per day with .strftime("%F") or if per hour: %F.%H etc
 " Use an extension to the buffer filename on open
 "autocmd BufWritePre * let &bex = '~' . strftime("%F")
 " On better, do that on write with the full recoded path
- if ! expand("%:p") =~ "^/var/tmp/"
- " # FIXME: only 1 exclusion so far: /var/tmp where sudoedit saves files
+" # WARNING: check an exclusion list to avoid saving sensitive files
+" only 1 exclusion so far: /var/tmp where sudoedit saves files
+ if expand("%:p") =~ "^/var/tmp/"
+   " cf https://vi.stackexchange.com/questions/16843/what-does-nowritebackup-actually-do
+   autocmd BufWritePre * :silent! set nobackup nowritebackup
+   autocmd BufWritePost * :silent! set backup
+ else
    autocmd BufWritePost * :silent! execute ':w! ' . &backupdir . "/" . substitute(escape(substitute(expand('%:p'), "/", "%", "g"), "%"), ' ', '\\ ', 'g') . '~' . strftime("%F.%H")
  endif
 endif
@@ -320,12 +352,13 @@ noremap <C-K> D
 " Make Ctrl-U delete to the beginning of the line
 inoremap <C-U> <C-O>d0
 noremap <C-U> d0
+
 " For Ctrl-K Ctrl-U killing a whole like, Ctrl-U should remove the cursor too
 "noremap <C-U> ld0
 
 " Alternative to make Ctrl-K Ctrl-U clear the whole line
-set virtualedit=onemore
-" But may have a worse 'side effect": x won't delete past EOL to merge lines
+"set virtualedit=onemore
+" FIXME: onemore worst 'side effect": x won't delete past EOL to merge lines
 " TODO: should have a remap of the whole sequence like
 "remap <C-K><C-U> D d0 x
 " but timings break the magic: the intermediate state of C-K will not be seen
@@ -813,7 +846,7 @@ set whichwrap=<,>,h,l,[,]
 set iskeyword=@,48-57,_,192-255,-,.,@-@
 
 " Options for the "text format" command ("gq")
-" j will remove the comment leader when merging lines
+" Adding j will remove the comment leader when merging lines
 set formatoptions=cqrtoj
 
 " ## SHOW COMMENTS IN ITALICS
@@ -837,7 +870,12 @@ endif
 
 " Show on the left the timestamp + encoding, on the right the positions and format
 "%{len(getbufinfo({'buflisted': 1}))}:%a
-set tabline=%{g:gitbranch}%t%a\ %{FileData()}\ \%{&fenc==\"\"?&enc:&fenc}(%{&bomb})\ %{&ff==\"dos\"?\"CRLF\":\"LF\"}%=%{mode()}\ @(x:%03c/%03{virtcol('$')},y:%04l/%0L)\ =0x%02B\ @%08O\ %P
+if &columns > 80
+ set tabline=%{g:gitbranch}%t%a\ %{FileData()}\ \%{&fenc==\"\"?&enc:&fenc}(%{&bomb})\ %{&ff==\"dos\"?\"CRLF\":\"LF\"}%=%{mode()}\ @(x:%03c/%03{virtcol('$')},y:%04l/%0L)\ =0x%02B\ @%08O\ %P
+else
+ " Reduce the tabline width when using a standard screen
+ set tabline=%{g:gitbranch}%t%a\ %{FileData()}\ \%{&fenc==\"\"?&enc:&fenc}(%{&bomb})\ %{&ff==\"dos\"?\"CRLF\":\"LF\"}%=%{mode()}\ @(x:%03c/%03{virtcol('$')},y:%04l/%0L)\ =0x%02B\ @%O\ %P
+endif
 " Show the tabline; can hide it with: :set showtabline=0
 set showtabline=2
 " The tabline need an autocommand to be dynamic
@@ -853,10 +891,15 @@ function! FileData()
  " get the epoch
  let ftime=getftime(expand("%"))
  if ftime>0
-  let msg=strftime("@%Y-%m-%d %H:%M:%S",ftime)
+  if &columns > 80
+   " Reduce the tabline width when using a standard screen
+   let msg=strftime("@%Y-%m-%d %H:%M:%S",ftime)
+  else
+   let msg=strftime("@%Y%m%d",ftime)
+  endif
  else " if ftime
-  " epoch<0 means the file doesn't exist
-  let msg="(UNSAVED NEW FILE)"
+  " epoch<0 means the file doesn't exist, so say it
+  let msg="(NEW)"
  endif " if ftime
  return msg
 endfunction
@@ -1345,7 +1388,7 @@ iab Yruler  12345678901234567890123456789012345678901234567890123456789012345678
 " Date
 iab Ydate <C-R>=strftime("%Y-%m-%d %H:%M")<CR>
 
-" ### FUNCTIONS  AS ,
+" ### FUNCTIONS AS ,
 
 " ,cel = "clear empty lines", but don't delete the lines
 " delete the *contents* of all lines which contain only whitespace.
@@ -1368,6 +1411,7 @@ map ,Sbl :g/^\s*$/,/\S/-j
 
 " ## DEFAULTS BY FILETYPE
 
+if has("autocmd")
 augroup python
  au!
  autocmd BufNewFile,BufReadPre,FileReadPre        *.py set tabstop=4
